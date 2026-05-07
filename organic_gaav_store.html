@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Organic Gaav</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:#fdf8f2;color:#2d2013}
+  a{text-decoration:none;color:inherit}
+
+  /* NAV */
+  nav{background:#2d5a27;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .nav-brand{color:#fff;font-size:22px;font-weight:700;letter-spacing:1px}
+  .nav-brand span{color:#c8e6a0;font-size:13px;display:block;font-weight:400;letter-spacing:0.5px}
+  .nav-cart{background:#fff;color:#2d5a27;border:none;border-radius:20px;padding:8px 18px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
+  .cart-badge{background:#e67e22;color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700}
+
+  /* HERO */
+  .hero{background:linear-gradient(135deg,#2d5a27 0%,#4a8c3f 60%,#7bb85a 100%);color:#fff;padding:60px 24px;text-align:center}
+  .hero h1{font-size:36px;font-weight:700;margin-bottom:10px;line-height:1.2}
+  .hero p{font-size:16px;opacity:0.88;max-width:500px;margin:0 auto 24px}
+  .hero-badge{display:inline-block;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.4);border-radius:20px;padding:6px 18px;font-size:13px;margin-bottom:20px}
+
+  /* PRODUCTS */
+  .section{padding:40px 20px;max-width:900px;margin:0 auto}
+  .section-title{font-size:22px;font-weight:700;color:#2d5a27;margin-bottom:6px}
+  .section-sub{font-size:14px;color:#6b5a3e;margin-bottom:24px}
+  .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px}
+  .product-card{background:#fff;border-radius:16px;overflow:hidden;border:1px solid #e8dcc8;transition:transform .15s}
+  .product-card:hover{transform:translateY(-3px)}
+  .product-img{width:100%;height:150px;display:flex;align-items:center;justify-content:center;font-size:56px;background:#f5f0e8}
+  .product-body{padding:14px 16px}
+  .product-name{font-size:15px;font-weight:700;color:#2d2013;margin-bottom:4px}
+  .product-desc{font-size:12px;color:#7a6245;margin-bottom:10px;line-height:1.5}
+  .product-footer{display:flex;align-items:center;justify-content:space-between}
+  .product-price{font-size:17px;font-weight:700;color:#2d5a27}
+  .product-price span{font-size:11px;color:#999;font-weight:400}
+  .add-btn{background:#2d5a27;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s}
+  .add-btn:hover{background:#3d7a37}
+  .tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;margin-bottom:8px;font-weight:600}
+  .tag-organic{background:#e8f5e0;color:#2d5a27}
+  .tag-raw{background:#fef3e2;color:#b7720a}
+  .tag-natural{background:#e8f0fe;color:#2d5a27}
+
+  /* CART DRAWER */
+  .cart-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200}
+  .cart-drawer{position:fixed;right:0;top:0;bottom:0;width:320px;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,0.12);z-index:201;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s}
+  .cart-open .cart-overlay{display:block}
+  .cart-open .cart-drawer{transform:translateX(0)}
+  .cart-header{padding:18px 20px;border-bottom:1px solid #e8dcc8;display:flex;justify-content:space-between;align-items:center}
+  .cart-header h2{font-size:18px;font-weight:700;color:#2d2013}
+  .close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:#7a6245;line-height:1}
+  .cart-items{flex:1;overflow-y:auto;padding:16px 20px}
+  .cart-empty{text-align:center;color:#aaa;font-size:14px;padding:40px 0}
+  .cart-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f0e8d8}
+  .cart-item-emoji{font-size:28px;width:44px;height:44px;background:#f5f0e8;border-radius:8px;display:flex;align-items:center;justify-content:center}
+  .cart-item-info{flex:1}
+  .cart-item-name{font-size:14px;font-weight:600;color:#2d2013}
+  .cart-item-price{font-size:13px;color:#2d5a27;font-weight:600}
+  .qty-ctrl{display:flex;align-items:center;gap:6px;margin-top:4px}
+  .qty-btn{background:#f0e8d8;border:none;border-radius:4px;width:22px;height:22px;font-size:14px;cursor:pointer;font-weight:700;color:#2d2013}
+  .qty-num{font-size:13px;font-weight:600;min-width:16px;text-align:center}
+  .remove-btn{background:none;border:none;color:#cc4444;font-size:18px;cursor:pointer;padding:0 4px}
+  .cart-footer{padding:16px 20px;border-top:1px solid #e8dcc8}
+  .cart-total{display:flex;justify-content:space-between;font-size:16px;font-weight:700;margin-bottom:14px;color:#2d2013}
+  .checkout-btn{width:100%;background:#2d5a27;color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;transition:background .15s}
+  .checkout-btn:hover{background:#3d7a37}
+  .wa-btn{width:100%;background:#25d366;color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
+  .wa-btn:hover{background:#1ebe5d}
+
+  /* CHECKOUT MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center}
+  .modal-overlay.show{display:flex}
+  .modal{background:#fff;border-radius:16px;padding:28px;width:92%;max-width:420px;max-height:85vh;overflow-y:auto}
+  .modal h2{font-size:20px;font-weight:700;color:#2d2013;margin-bottom:20px}
+  .form-group{margin-bottom:14px}
+  .form-group label{display:block;font-size:13px;font-weight:600;color:#6b5a3e;margin-bottom:5px}
+  .form-group input,.form-group textarea{width:100%;padding:10px 12px;border:1.5px solid #e8dcc8;border-radius:8px;font-size:14px;color:#2d2013;outline:none;font-family:inherit;transition:border .15s}
+  .form-group input:focus,.form-group textarea:focus{border-color:#2d5a27}
+  .form-group textarea{height:70px;resize:vertical}
+  .order-summary{background:#f5f0e8;border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px}
+  .order-summary-title{font-weight:700;color:#2d5a27;margin-bottom:8px;font-size:14px}
+  .order-line{display:flex;justify-content:space-between;padding:3px 0;color:#4a3520}
+  .order-total-line{display:flex;justify-content:space-between;font-weight:700;font-size:15px;margin-top:8px;padding-top:8px;border-top:1px solid #d8c8a8;color:#2d2013}
+  .place-btn{width:100%;background:#2d5a27;color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;transition:background .15s}
+  .place-btn:hover{background:#3d7a37}
+  .cancel-btn{width:100%;background:#f5f0e8;color:#6b5a3e;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer}
+
+  /* SUCCESS */
+  .success-screen{display:none;position:fixed;inset:0;background:#fff;z-index:400;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px}
+  .success-screen.show{display:flex}
+  .success-icon{font-size:70px;margin-bottom:20px}
+  .success-screen h2{font-size:26px;font-weight:700;color:#2d5a27;margin-bottom:10px}
+  .success-screen p{color:#7a6245;font-size:15px;line-height:1.6;max-width:360px;margin-bottom:28px}
+  .back-btn{background:#2d5a27;color:#fff;border:none;border-radius:10px;padding:14px 36px;font-size:15px;font-weight:700;cursor:pointer}
+
+  /* WA FLOAT */
+  .wa-float{position:fixed;bottom:24px;right:24px;background:#25d366;color:#fff;border:none;border-radius:50px;padding:13px 20px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(37,211,102,0.35);display:flex;align-items:center;gap:8px;z-index:150;transition:background .15s}
+  .wa-float:hover{background:#1ebe5d}
+  .wa-icon{font-size:20px}
+
+  @media(max-width:500px){
+    .hero h1{font-size:26px}
+    .products-grid{grid-template-columns:1fr 1fr}
+    .cart-drawer{width:100%}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    🌿 Organic Gaav
+    <span>Farm to Your Home</span>
+  </div>
+  <button class="nav-cart" onclick="toggleCart()">
+    🛒 Cart <span class="cart-badge" id="cart-count">0</span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">🌾 100% Natural · Direct from Farm</div>
+  <h1>Pure. Organic. From Our Village to You.</h1>
+  <p>Handcrafted ghee, raw honey, heirloom grains & spices — the way nature intended. No chemicals. No middleman.</p>
+</div>
+
+<!-- PRODUCTS -->
+<div class="section">
+  <div class="section-title">🛒 Our Products</div>
+  <div class="section-sub">Sourced directly from Jawalwadi & surrounding farms, Maharashtra</div>
+  <div class="products-grid" id="products-grid"></div>
+</div>
+
+<!-- CART OVERLAY -->
+<div class="cart-overlay" onclick="toggleCart()"></div>
+
+<!-- CART DRAWER -->
+<div class="cart-drawer">
+  <div class="cart-header">
+    <h2>Your Cart</h2>
+    <button class="close-btn" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cart-items">
+    <div class="cart-empty">Your cart is empty 🌿</div>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span>Total</span>
+      <span id="cart-total">₹0</span>
+    </div>
+    <button class="checkout-btn" onclick="openCheckout()">Proceed to Checkout</button>
+    <button class="wa-btn" onclick="orderViaWhatsApp()">
+      <span>💬</span> Order via WhatsApp
+    </button>
+  </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal-overlay" id="checkout-modal">
+  <div class="modal">
+    <h2>Complete Your Order</h2>
+    <div class="order-summary" id="order-summary"></div>
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" id="cust-name" placeholder="Rutik Jagtap" />
+    </div>
+    <div class="form-group">
+      <label>Phone Number</label>
+      <input type="tel" id="cust-phone" placeholder="+91 98765 43210" />
+    </div>
+    <div class="form-group">
+      <label>Delivery Address</label>
+      <textarea id="cust-addr" placeholder="House No., Village, Taluka, District, Pincode"></textarea>
+    </div>
+    <button class="place-btn" onclick="placeOrder()">Place Order 🌿</button>
+    <button class="cancel-btn" onclick="closeCheckout()">Cancel</button>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="success-screen" id="success-screen">
+  <div class="success-icon">🎉</div>
+  <h2>Order Placed Successfully!</h2>
+  <p>Thank you for choosing Organic Gaav. Your order has been received. We'll contact you on WhatsApp to confirm delivery details.</p>
+  <button class="back-btn" onclick="resetStore()">Continue Shopping</button>
+</div>
+
+<!-- WA FLOAT BUTTON -->
+<button class="wa-float" onclick="orderViaWhatsApp()">
+  <span class="wa-icon">💬</span> WhatsApp Order
+</button>
+
+<script>
+const products = [
+  {id:1, name:"Desi Cow Ghee", emoji:"🫙", price:650, unit:"500ml", desc:"Pure A2 bilona ghee from desi cows. Made with the traditional hand-churning method.", tag:"organic", tagLabel:"Organic"},
+  {id:2, name:"Wild Forest Honey", emoji:"🍯", price:420, unit:"250g", desc:"Raw, unfiltered honey collected from forest beehives. No heating, no additives.", tag:"raw", tagLabel:"Raw & Pure"},
+  {id:3, name:"Jowar (Sorghum)", emoji:"🌾", price:120, unit:"1kg", desc:"Heirloom red jowar, naturally grown without pesticides. High protein & fibre.", tag:"natural", tagLabel:"Natural"},
+  {id:4, name:"Bajra (Pearl Millet)", emoji:"🌾", price:90, unit:"1kg", desc:"Sun-dried bajra from traditional farms. Perfect for roti and porridge.", tag:"natural", tagLabel:"Natural"},
+  {id:5, name:"Turmeric Powder", emoji:"🟡", price:180, unit:"200g", desc:"High-curcumin turmeric ground from fresh farm turmeric. Deep yellow, strong aroma.", tag:"organic", tagLabel:"Organic"},
+  {id:6, name:"Cold-Press Groundnut Oil", emoji:"🫙", price:380, unit:"1 litre", desc:"Traditional wooden-press groundnut oil. No refining, full nutrition intact.", tag:"raw", tagLabel:"Raw"},
+  {id:7, name:"Organic Compost", emoji:"🌱", price:200, unit:"5kg", desc:"Farm-made organic compost from cow dung & crop residue. Ideal for home gardens.", tag:"natural", tagLabel:"For Garden"},
+  {id:8, name:"Dhaniya (Coriander)", emoji:"🌿", price:60, unit:"100g", desc:"Freshly dried and ground coriander seeds from our spice farm. Aromatic & bold.", tag:"organic", tagLabel:"Organic"},
+];
+
+let cart = {};
+
+function renderProducts(){
+  const g = document.getElementById('products-grid');
+  g.innerHTML = products.map(p=>`
+    <div class="product-card">
+      <div class="product-img">${p.emoji}</div>
+      <div class="product-body">
+        <div class="tag tag-${p.tag}">${p.tagLabel}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-desc">${p.desc}</div>
+        <div class="product-footer">
+          <div class="product-price">₹${p.price} <span>/ ${p.unit}</span></div>
+          <button class="add-btn" onclick="addToCart(${p.id})">+ Add</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addToCart(id){
+  cart[id] = (cart[id]||0)+1;
+  updateCartUI();
+  showToast(products.find(p=>p.id===id).name+' added!');
+}
+
+function removeFromCart(id){
+  delete cart[id];
+  updateCartUI();
+}
+
+function changeQty(id,delta){
+  cart[id] = (cart[id]||0)+delta;
+  if(cart[id]<=0) delete cart[id];
+  updateCartUI();
+}
+
+function updateCartUI(){
+  const total = Object.entries(cart).reduce((s,[id,q])=>s+products.find(p=>p.id==id).price*q,0);
+  const count = Object.values(cart).reduce((s,q)=>s+q,0);
+  document.getElementById('cart-count').textContent=count;
+  document.getElementById('cart-total').textContent='₹'+total.toLocaleString('en-IN');
+
+  const ci = document.getElementById('cart-items');
+  if(!count){ci.innerHTML='<div class="cart-empty">Your cart is empty 🌿</div>';return;}
+  ci.innerHTML = Object.entries(cart).map(([id,qty])=>{
+    const p=products.find(x=>x.id==id);
+    return `<div class="cart-item">
+      <div class="cart-item-emoji">${p.emoji}</div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${p.name}</div>
+        <div class="cart-item-price">₹${(p.price*qty).toLocaleString('en-IN')}</div>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeQty(${id},-1)">−</button>
+          <span class="qty-num">${qty}</span>
+          <button class="qty-btn" onclick="changeQty(${id},1)">+</button>
+        </div>
+      </div>
+      <button class="remove-btn" onclick="removeFromCart(${id})">🗑</button>
+    </div>`;
+  }).join('');
+}
+
+function toggleCart(){
+  document.body.classList.toggle('cart-open');
+}
+
+function openCheckout(){
+  const total = Object.entries(cart).reduce((s,[id,q])=>s+products.find(p=>p.id==id).price*q,0);
+  const lines = Object.entries(cart).map(([id,qty])=>{
+    const p=products.find(x=>x.id==id);
+    return `<div class="order-line"><span>${p.name} × ${qty}</span><span>₹${(p.price*qty).toLocaleString('en-IN')}</span></div>`;
+  }).join('');
+  document.getElementById('order-summary').innerHTML=`
+    <div class="order-summary-title">Order Summary</div>
+    ${lines}
+    <div class="order-total-line"><span>Total</span><span>₹${total.toLocaleString('en-IN')}</span></div>
+  `;
+  document.getElementById('checkout-modal').classList.add('show');
+}
+
+function closeCheckout(){
+  document.getElementById('checkout-modal').classList.remove('show');
+}
+
+function placeOrder(){
+  const name=document.getElementById('cust-name').value.trim();
+  const phone=document.getElementById('cust-phone').value.trim();
+  const addr=document.getElementById('cust-addr').value.trim();
+  if(!name||!phone||!addr){alert('Please fill all fields.');return;}
+  closeCheckout();
+  document.body.classList.remove('cart-open');
+  document.getElementById('success-screen').classList.add('show');
+  // Also open WhatsApp
+  orderViaWhatsApp(name,phone,addr);
+}
+
+function orderViaWhatsApp(name,phone,addr){
+  const items=Object.entries(cart).map(([id,qty])=>{
+    const p=products.find(x=>x.id==id);
+    return `• ${p.name} (${p.unit}) × ${qty} = ₹${p.price*qty}`;
+  }).join('\n');
+  const total=Object.entries(cart).reduce((s,[id,q])=>s+products.find(p=>p.id==id).price*q,0);
+  const msg=`🌿 *New Order – Organic Gaav*\n\n*Name:* ${name||'—'}\n*Phone:* ${phone||'—'}\n*Address:* ${addr||'—'}\n\n*Items:*\n${items||'(none)'}\n\n*Total: ₹${total.toLocaleString('en-IN')}*\n\nPlease confirm my order. Thank you!`;
+  window.open('https://wa.me/919876543210?text='+encodeURIComponent(msg),'_blank');
+}
+
+function resetStore(){
+  cart={};
+  updateCartUI();
+  document.getElementById('success-screen').classList.remove('show');
+  document.getElementById('cust-name').value='';
+  document.getElementById('cust-phone').value='';
+  document.getElementById('cust-addr').value='';
+}
+
+function showToast(msg){
+  const t=document.createElement('div');
+  t.textContent=msg;
+  Object.assign(t.style,{position:'fixed',bottom:'80px',left:'50%',transform:'translateX(-50%)',background:'#2d5a27',color:'#fff',padding:'10px 20px',borderRadius:'20px',fontSize:'13px',fontWeight:'600',zIndex:'500',whiteSpace:'nowrap',opacity:'0',transition:'opacity .2s'});
+  document.body.appendChild(t);
+  setTimeout(()=>t.style.opacity='1',10);
+  setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),200)},1800);
+}
+
+renderProducts();
+</script>
+</body>
+</html>
